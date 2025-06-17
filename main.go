@@ -9,6 +9,7 @@ import (
 
 func main() {
 	http.HandleFunc("/login", handleLogin)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	log.Println("Listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -21,4 +22,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, "Login Successful!")
+	fmt.Println("Login Successful!")
+	return
 }
