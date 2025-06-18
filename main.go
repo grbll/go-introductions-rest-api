@@ -20,8 +20,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
+	var name string = r.FormValue("name")
 
-	fmt.Fprintln(w, "Login Successful!")
-	fmt.Println("Login Successful!")
+	fmt.Fprintf(w, "Welcome %v", name)
 	return
 }

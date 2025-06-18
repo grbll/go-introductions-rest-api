@@ -7,17 +7,29 @@
 </head>
 
 <body>
-  <input id="name" placeholder="Enter your name">
-  <button onclick="login()">Login</button>
+  <form id="loginForm">
+    <input id="name" placeholder="Enter your name" required>
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="message"></p>
 
   <script>
-    function login() {
+    document.getElementById("loginForm").addEventListener("submit", function (event) {
+      event.preventDefault(); // Prevent the browser from doing a real page reload
+
+      const name = document.getElementById("name").value;
+
       fetch("/login", {
         method: "POST",
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: "name=" + encodeURIComponent(document.getElementById("name").value)
-      });
-    }
+        body: "name=" + encodeURIComponent(name)
+      })
+        .then(response => response.text())
+        .then(text => {
+          document.getElementById("message").textContent = text;
+        });
+    });
   </script>
 </body>
 
