@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
+	"net/http"
+	// "time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"net/http"
 )
 
 func main() {
@@ -32,28 +32,27 @@ func main() {
 	}
 
 	http.HandleFunc("/login", handleLogin)
-	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	log.Println("Listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
-	for {
-		rows, err := db.Query("Select * FROM users")
-		if err != nil {
-			log.Fatalf("DB query error: %v", err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var id int
-			var email string
-			if err := rows.Scan(&id, &email); err != nil {
-				log.Printf("Row scan error: %v", err)
-				continue
-			}
-			fmt.Printf("ID: %d, Email: %s\n", id, email)
-		}
-		time.Sleep(2 * time.Second)
-	}
+	// for {
+	// 	rows, err := db.Query("Select * FROM users")
+	// 	if err != nil {
+	// 		log.Fatalf("DB query error: %v", err)
+	// 	}
+	// 	defer rows.Close()
+	// 	for rows.Next() {
+	// 		var id int
+	// 		var email string
+	// 		if err := rows.Scan(&id, &email); err != nil {
+	// 			log.Printf("Row scan error: %v", err)
+	// 			continue
+	// 		}
+	// 		fmt.Printf("ID: %d, Email: %s\n", id, email)
+	// 	}
+	// 	time.Sleep(2 * time.Second)
+	// }
 }
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
