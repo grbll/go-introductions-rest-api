@@ -4,7 +4,7 @@ import "time"
 
 type UserSession struct {
 	UserID       int
-	UserName     string
+	UserMail     string
 	SessionStart *time.Time
 	SessionEnd   *time.Time
 }

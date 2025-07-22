@@ -33,26 +33,8 @@ func main() {
 
 	http.HandleFunc("/login", handleLogin)
 
-	log.Println("Listening on http://localhost:8080")
+	log.Println("Goapp 0.0.1 Listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-
-	// for {
-	// 	rows, err := db.Query("Select * FROM users")
-	// 	if err != nil {
-	// 		log.Fatalf("DB query error: %v", err)
-	// 	}
-	// 	defer rows.Close()
-	// 	for rows.Next() {
-	// 		var id int
-	// 		var email string
-	// 		if err := rows.Scan(&id, &email); err != nil {
-	// 			log.Printf("Row scan error: %v", err)
-	// 			continue
-	// 		}
-	// 		fmt.Printf("ID: %d, Email: %s\n", id, email)
-	// 	}
-	// 	time.Sleep(2 * time.Second)
-	// }
 }
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -60,8 +42,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
-	var name string = r.FormValue("name")
+	var email string = r.FormValue("email")
 
-	fmt.Fprintf(w, "Welcome %v", name)
+	fmt.Fprintf(w, "Welcome %v", email)
 	return
 }
