@@ -25,9 +25,9 @@ func main() {
 	log.Println("Connection to timestampdb succesufll!")
 
 	log.Println("Goapp 0.0.1 Listening on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	var authHandler = &handler.AuthHandler{DB: db}
 
 	http.HandleFunc("/login", authHandler.Login)
+	log.Println(http.ListenAndServe(":8080", nil))
 }

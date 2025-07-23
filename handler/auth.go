@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -12,6 +13,7 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	log.Println("hallo")
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
