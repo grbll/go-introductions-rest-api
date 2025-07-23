@@ -2,10 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"github.com/grbll/go-introductions-rest-api/handler"
 	"log"
 	"net/http"
-	// "time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -23,45 +22,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("DB connect error: %v", err)
 	}
-
-	fmt.Println("Connection to timestampdb succesufll!")
-
-	_, err = db.Exec(`INSERT INTO users (user_email) VALUES (?)`, "newuser@example.com")
-	if err != nil {
-		log.Fatalf("Insert failed: %v", err)
-	}
-
-	http.HandleFunc("/login", handleLogin)
+	log.Println("Connection to timestampdb succesufll!")
 
 	log.Println("Listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
-	// for {
-	// 	rows, err := db.Query("Select * FROM users")
-	// 	if err != nil {
-	// 		log.Fatalf("DB query error: %v", err)
-	// 	}
-	// 	defer rows.Close()
-	// 	for rows.Next() {
-	// 		var id int
-	// 		var email string
-	// 		if err := rows.Scan(&id, &email); err != nil {
-	// 			log.Printf("Row scan error: %v", err)
-	// 			continue
-	// 		}
-	// 		fmt.Printf("ID: %d, Email: %s\n", id, email)
-	// 	}
-	// 	time.Sleep(2 * time.Second)
-	// }
-}
+	var authHandler = &handler.AuthHandler{DB: db}
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
-		return
-	}
-	var name string = r.FormValue("name")
+	http.HandleFunc("/login", authHandler.Login)
 
-	fmt.Fprintf(w, "Welcome %v", name)
-	return
 }
