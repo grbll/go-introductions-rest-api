@@ -22,12 +22,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("DB connect error: %v", err)
 	}
-	log.Println("Connection to timestampdb succesufll!")
 
-	log.Println("Goapp 0.0.1 Listening on http://localhost:8080")
+	log.Println("Connection to timestampdb succesufll!")
 
 	var authHandler = &handler.AuthHandler{DB: db}
 
 	http.HandleFunc("/login", authHandler.Login)
-	log.Println(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Goapp 0.0.2 Listening on http://localhost:8080")
 }
