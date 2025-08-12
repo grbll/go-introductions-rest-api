@@ -2,9 +2,13 @@ package models
 
 import "time"
 
-type UserSession struct {
-	UserID       int
-	UserMail     string
+type ActiveSession struct {
+	SessionId    int
+	UserId       int
 	SessionStart *time.Time
-	SessionEnd   *time.Time
+}
+
+type ClosedSession struct {
+	ActiveSession
+	SessionEnd *time.Time
 }

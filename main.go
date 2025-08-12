@@ -29,5 +29,5 @@ func main() {
 
 	http.HandleFunc("/login", authHandler.Login)
 	log.Fatal(http.ListenAndServe(":8080", nil))
-	log.Println("Goapp 0.0.2 Listening on http://localhost:8080")
+	log.Println("Goapp 0.0.3 Listening on http://localhost:8080")
 }
