@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -10,66 +12,85 @@ import (
 	. "github.com/grbll/go-introductions-rest-api/models"
 )
 
-var getUserByIdSql string = "SELECT * FROM users WHERE user_id = ? LIMIT 1"
+const getById string = "GetById"
+
+var queryCollection map[string]string = map[string]string{
+	getById: "SELECT * FROM users WHERE user_id = ? LIMIT 1",
+}
 
 type MySQLUserRepository struct {
 	db *sql.DB
 
-	mu sync.Mutex
-
-	userByIdStmt *sql.Stmt
+	mu   sync.Mutex
+	stmt map[string]*sql.Stmt
 }
 
 func NewMySQLUserRepository(db *sql.DB) *MySQLUserRepository {
-	return &MySQLUserRepository{db: db, mu: sync.Mutex{}}
-}
-
-func (r *MySQLUserRepository) ensureUserByIdStatement(ctx context.Context) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if r.userByIdStmt != nil {
-		return nil
-	}
-
-	stmt, err := r.db.PrepareContext(ctx, getUserByIdSql)
-	if err != nil {
-		return err
-	}
-
-	r.userByIdStmt = stmt
-	return nil
-}
-
-func (r *MySQLUserRepository) GetUserById(ctx context.Context, userid int) (*User, error) {
-	ensureCtx, ensureCancel := context.WithTimeout(ctx, time.Second*2)
-	defer ensureCancel()
-
-	err := r.ensureUserByIdStatement(ensureCtx)
-	if err != nil {
-		return nil, err
-	}
-
-	var user *User = &User{}
-
-	queryCtx, queryCancel := context.WithTimeout(ctx, time.Second*2)
-	defer queryCancel()
-
-	err = r.userByIdStmt.QueryRowContext(queryCtx, userid).Scan(&user.UserId, &user.Email, &user.TotalTime)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
+	return &MySQLUserRepository{db: db, mu: sync.Mutex{}, stmt: map[string]*sql.Stmt{}}
 }
 
 func (r *MySQLUserRepository) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if r.userByIdStmt != nil {
-		return r.userByIdStmt.Close()
+	var errorCollection []error
+
+	for name, stmt := range r.stmt {
+		if stmt != nil {
+			if err := stmt.Close(); err != nil {
+				errorCollection = append(errorCollection, err)
+			}
+			delete(r.stmt, name)
+		}
+	}
+
+	if len(errorCollection) > 0 {
+		return errors.Join(errorCollection...)
 	}
 
 	return nil
+}
+
+func (r *MySQLUserRepository) getStmt(ctx context.Context, name string) (*sql.Stmt, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if stmt, ok := r.stmt[name]; ok && stmt != nil {
+		return stmt, nil
+	}
+
+	query, ok := queryCollection[name]
+	if !ok {
+		return nil, fmt.Errorf("prepare %q: unknown query!", name)
+	}
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("prepare %q: %w", name, err)
+	}
+
+	r.stmt[name] = stmt
+	return stmt, nil
+}
+
+func (r *MySQLUserRepository) GetById(ctx context.Context, userid int) (*User, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	stmt, err := r.getStmt(ctx, getById)
+	if err != nil {
+		return nil, err
+	}
+
+	var user *User = &User{}
+
+	err = stmt.QueryRowContext(ctx, userid).Scan(&user.UserId, &user.Email, &user.TotalTime)
+	switch err {
+	case nil:
+		return user, nil
+	case sql.ErrNoRows:
+		return nil, err
+	default:
+		return nil, fmt.Errorf("%q %d: %w", getById, userid, err)
+	}
 }
