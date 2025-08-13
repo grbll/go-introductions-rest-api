@@ -2,11 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"github.com/grbll/go-introductions-rest-api/handler"
 	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/grbll/go-introductions-rest-api/handler"
+	"github.com/grbll/go-introductions-rest-api/repository"
+	"github.com/grbll/go-introductions-rest-api/service"
 )
 
 func main() {
@@ -22,12 +25,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("DB connect error: %v", err)
 	}
-
 	log.Println("Connection to timestampdb succesufll!")
 
-	var authHandler = &handler.AuthHandler{DB: db}
+	var userRepository *repository.MySQLUserRepository = repository.NewMySQLUserRepository(db)
+	var userService *service.UserService = service.NewUserService(userRepository)
+	var authHandler *handler.AuthHandler = handler.NewAuthHandler(userService)
 
 	http.HandleFunc("/login", authHandler.Login)
+
+	log.Println("Goapp 0.0.4 Listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-	log.Println("Goapp 0.0.3 Listening on http://localhost:8080")
 }

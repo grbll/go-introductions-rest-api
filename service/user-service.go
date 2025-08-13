@@ -6,19 +6,19 @@ import (
 )
 
 type UserRepository interface {
-	GetUserById(ctx context.Context, userid int) (*User, error)
+	GetById(ctx context.Context, userid int) (*User, error)
 	// CreateUser(ctx context.Context, user *User) error
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 }
 
 type UserService struct {
-	Repo *UserRepository
+	repo UserRepository
 }
 
-func NewUserService(repo *UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func NewUserService(repo UserRepository) *UserService {
+	return &UserService{repo: repo}
 }
 
-func (s *UserService) IsUserRegistered(email string) (bool, error) {
-	return true, nil
+func (s *UserService) IsUserRegistered(ctx context.Context, email string) (bool, error) {
+	return s.repo.ExistsByEmail(ctx, email)
 }

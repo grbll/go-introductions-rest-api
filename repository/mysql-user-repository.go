@@ -13,9 +13,11 @@ import (
 )
 
 const getById string = "GetById"
+const existsByEmail string = "ExistsByEmail"
 
 var queryCollection map[string]string = map[string]string{
-	getById: "SELECT * FROM users WHERE user_id = ? LIMIT 1",
+	getById:       "SELECT * FROM users WHERE user_id = ? LIMIT 1",
+	existsByEmail: "SELECT EXISTS(SELECT 1 FROM users WHERE user_email = ? LIMIT 1)",
 }
 
 type MySQLUserRepository struct {
@@ -93,4 +95,23 @@ func (r *MySQLUserRepository) GetById(ctx context.Context, userid int) (*User, e
 	default:
 		return nil, fmt.Errorf("%q %d: %w", getById, userid, err)
 	}
+}
+
+func (r *MySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	stmt, err := r.getStmt(ctx, existsByEmail)
+	if err != nil {
+		return false, err
+	}
+
+	var exists bool
+
+	err = stmt.QueryRowContext(ctx, email).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }
