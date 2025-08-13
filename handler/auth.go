@@ -49,6 +49,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !exists {
+		log.Printf("User not Registered")
 		http.Error(w, "User not Registered", http.StatusNotFound)
 	}
 
