@@ -27,7 +27,7 @@ func NewAuthHandler(us *service.UserService) *AuthHandler {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed!", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed!", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -38,23 +38,27 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&login)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		writeJSONError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
 	exists, err := h.userService.IsUserRegistered(r.Context(), login.Email)
 	if err != nil {
-		log.Printf("failed to check user registration for %q: %v", login.Email, err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	if !exists {
-		log.Printf("User not Registered")
-		http.Error(w, "User not Registered", http.StatusNotFound)
+		writeJSONError(w, "User not Registered", http.StatusNotFound)
+		return
 	}
 
 	response.Message = fmt.Sprintf("Welcome %s", login.Email)
-
 	json.NewEncoder(w).Encode(response)
 	return
+}
+
+func writeJSONError(w http.ResponseWriter, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
