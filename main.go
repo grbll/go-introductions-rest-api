@@ -12,6 +12,8 @@ import (
 	"github.com/grbll/go-introductions-rest-api/service"
 )
 
+var version string = "0.0.5"
+
 func main() {
 	var dsn string = "goapp:goapp@tcp(mysql:3306)/timestampdb"
 	db, err := sql.Open("mysql", dsn)
@@ -33,6 +35,6 @@ func main() {
 
 	http.HandleFunc("/login", authHandler.Login)
 
-	log.Println("Goapp 0.0.42 Listening on http://localhost:8080")
+	log.Printf("Goapp %v Listening on http://localhost:8080", version)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
