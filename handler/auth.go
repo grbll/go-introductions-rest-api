@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/grbll/go-introductions-rest-api/service"
@@ -51,7 +52,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.Message = fmt.Sprintf("Welcome %s", login.Email)
+	responFse.Message = fmt.Sprintf("Welcome %s", login.Email)
 	json.NewEncoder(w).Encode(response)
 	return
 }
@@ -79,6 +80,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	exists, err := h.userService.IsUserRegistered(r.Context(), login.Email)
 	if err != nil {
+		log.Print(err)
 		writeJSONError(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -89,6 +91,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	err = h.userService.RegisterUser(r.Context(), login.Email)
 	if err != nil {
+		log.Print(err)
 		writeJSONError(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
