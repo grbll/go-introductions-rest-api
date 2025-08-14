@@ -14,10 +14,12 @@ import (
 
 const getById string = "GetById"
 const existsByEmail string = "ExistsByEmail"
+const insertUser string = "InsertUser"
 
 var queryCollection map[string]string = map[string]string{
 	getById:       "SELECT * FROM users WHERE user_id = ? LIMIT 1",
 	existsByEmail: "SELECT EXISTS(SELECT 1 FROM users WHERE user_email = ? LIMIT 1)",
+	insertUser:    "INSERT INTO users VALUES (?,0)",
 }
 
 type MySQLUserRepository struct {
@@ -114,4 +116,21 @@ func (r *MySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (
 	}
 
 	return exists, nil
+}
+
+func (r *MySQLUserRepository) InsertUser(ctx context.Context, email string) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	stmt, err := r.getStmt(ctx, insertUser)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.ExecContext(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
