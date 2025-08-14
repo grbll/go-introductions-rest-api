@@ -52,7 +52,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responFse.Message = fmt.Sprintf("Welcome %s", login.Email)
+	response.Message = fmt.Sprintf("Welcome %s", login.Email)
 	json.NewEncoder(w).Encode(response)
 	return
 }
