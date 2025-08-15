@@ -55,6 +55,39 @@ func (r *MySQLUserRepository) Close() error {
 	return nil
 }
 
+func newMappedUser() (*User, map[string]any) {
+	var user *User = &User{}
+	var mapping map[string]any = map[string]any{}
+
+	mapping["user_id"] = &user.UserId
+	mapping["user_email"] = &user.Email
+	mapping["user_total_time"] = &user.TotalTime
+
+	return user, mapping
+}
+
+func newUserFromRow(rows *sql.Rows) (*User, error) {
+	cols, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	var dest []any = make([]any, len(cols), len(cols))
+	user, mapping := newMappedUser()
+	for i, name := range cols {
+		if ref, ok := mapping[name]; ok {
+			dest[i] = ref
+		}
+	}
+
+	err = rows.Scan(dest...)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *MySQLUserRepository) getStmt(ctx context.Context, name string) (*sql.Stmt, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -86,17 +119,19 @@ func (r *MySQLUserRepository) GetById(ctx context.Context, userid int) (*User, e
 		return nil, err
 	}
 
-	var user *User = &User{}
+	rows, err := stmt.QueryContext(ctx, userid)
+	defer rows.Close()
 
-	err = stmt.QueryRowContext(ctx, userid).Scan(&user.UserId, &user.Email, &user.TotalTime)
-	switch err {
-	case nil:
-		return user, nil
-	case sql.ErrNoRows:
+	if err != nil {
 		return nil, err
-	default:
-		return nil, fmt.Errorf("%q %d: %w", getById, userid, err)
 	}
+
+	user, err := newUserFromRow(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (r *MySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
