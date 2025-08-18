@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/grbll/go-introductions-rest-api/handler"
-	"github.com/grbll/go-introductions-rest-api/mysqlrepository"
+	"github.com/grbll/go-introductions-rest-api/repository/mysql"
 	"github.com/grbll/go-introductions-rest-api/service"
 )
 
