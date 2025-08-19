@@ -1,13 +1,21 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/grbll/go-introductions-rest-api/service"
 )
+
+type UserService interface {
+	IsUserRegistered(ctx context.Context, email string) (bool, error)
+	RegisterUser(ctx context.Context, email string) error
+}
+
+type AuthHandler struct {
+	us UserService
+}
 
 type LoginRequest struct {
 	Email string `json:"email"`
@@ -17,12 +25,8 @@ type LoginResponse struct {
 	Message string `json:"message"`
 }
 
-type AuthHandler struct {
-	userService *service.UserService
-}
-
-func NewAuthHandler(us *service.UserService) *AuthHandler {
-	return &AuthHandler{userService: us}
+func NewAuthHandler(us UserService) *AuthHandler {
+	return &AuthHandler{us: us}
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +46,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := h.userService.IsUserRegistered(r.Context(), login.Email)
+	exists, err := h.us.IsUserRegistered(r.Context(), login.Email)
 	if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -78,7 +82,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := h.userService.IsUserRegistered(r.Context(), login.Email)
+	exists, err := h.us.IsUserRegistered(r.Context(), login.Email)
 	if err != nil {
 		log.Print(err)
 		writeJSONError(w, "Internal Server Error", http.StatusInternalServerError)
@@ -89,7 +93,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userService.RegisterUser(r.Context(), login.Email)
+	err = h.us.RegisterUser(r.Context(), login.Email)
 	if err != nil {
 		log.Print(err)
 		writeJSONError(w, "Internal Server Error", http.StatusInternalServerError)

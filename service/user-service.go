@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	. "github.com/grbll/go-introductions-rest-api/models"
 )
 
+// type User interface {}
+
 type UserRepository interface {
-	GetById(ctx context.Context, userid int) (*User, error)
-	// CreateUser(ctx context.Context, user *User) error
+	// GetById(ctx context.Context, userid int) (User, error)
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 	InsertUser(ctx context.Context, email string) error
 }

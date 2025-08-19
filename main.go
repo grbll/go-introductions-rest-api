@@ -1,15 +1,17 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/grbll/go-introductions-rest-api/handler"
-	"github.com/grbll/go-introductions-rest-api/repository/mysql"
+
 	"github.com/grbll/go-introductions-rest-api/service"
+
+	"github.com/grbll/go-introductions-rest-api/repository/user/mysql"
 )
 
 var version string = "0.0.623"
@@ -29,7 +31,7 @@ func main() {
 	}
 	log.Println("Connection to timestampdb succesufll!")
 
-	var userRepository *mysqlrepository.MySQLUserRepository = mysqlrepository.NewMySQLUserRepository(db)
+	var userRepository *mysqluserrepo.MySQLUserRepository = mysqluserrepo.NewMySQLUserRepository(db)
 	var userService *service.UserService = service.NewUserService(userRepository)
 	var authHandler *handler.AuthHandler = handler.NewAuthHandler(userService)
 
