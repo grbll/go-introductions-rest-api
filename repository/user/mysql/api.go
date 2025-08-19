@@ -10,11 +10,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func NewMySQLUserRepository(db *sql.DB) *MySQLUserRepository {
-	return &MySQLUserRepository{db: db, mu: sync.Mutex{}, stmt: map[string]*sql.Stmt{}}
+func NewMySQLUserRepository(db *sql.DB) *mySQLUserRepository {
+	return &mySQLUserRepository{db: db, mu: sync.Mutex{}, stmt: map[string]*sql.Stmt{}}
 }
 
-func (r *MySQLUserRepository) Close() error {
+func (r *mySQLUserRepository) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -60,7 +60,7 @@ func (r *MySQLUserRepository) Close() error {
 // 	return user, nil
 // }
 
-func (r *MySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
+func (r *mySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
@@ -79,7 +79,7 @@ func (r *MySQLUserRepository) ExistsByEmail(ctx context.Context, email string) (
 	return exists, nil
 }
 
-func (r *MySQLUserRepository) InsertUser(ctx context.Context, email string) error {
+func (r *mySQLUserRepository) InsertUser(ctx context.Context, email string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 

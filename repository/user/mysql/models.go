@@ -7,13 +7,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type MySQLUser struct {
-	ID        int
-	EMail     string
-	TotalTime int
+type mySQLUser struct {
+	iD        int
+	eMail     string
+	totalTime int
 }
 
-type MySQLUserRepository struct {
+type mySQLUserRepository struct {
 	db *sql.DB
 
 	mu   sync.Mutex
