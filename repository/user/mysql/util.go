@@ -8,13 +8,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func newMappedUser() (*MySQLUser, map[string]any) {
-	var user *MySQLUser = &MySQLUser{}
+func newMappedUser() (*mySQLUser, map[string]any) {
+	var user *mySQLUser = &mySQLUser{}
 	var mapping map[string]any = map[string]any{}
 
-	mapping["user_id"] = &user.ID
-	mapping["user_email"] = &user.EMail
-	mapping["user_total_time"] = &user.TotalTime
+	mapping["user_id"] = &user.iD
+	mapping["user_email"] = &user.eMail
+	mapping["user_total_time"] = &user.totalTime
 
 	return user, mapping
 }
@@ -41,7 +41,7 @@ func newMappedUser() (*MySQLUser, map[string]any) {
 // 	return user, nil
 // }
 
-func (r *MySQLUserRepository) getStmt(ctx context.Context, name string) (*sql.Stmt, error) {
+func (r *mySQLUserRepository) getStmt(ctx context.Context, name string) (*sql.Stmt, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

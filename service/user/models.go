@@ -10,6 +10,6 @@ type userRepository interface {
 	InsertUser(ctx context.Context, email string) error
 }
 
-type UserService struct {
+type userService struct {
 	repo userRepository
 }
