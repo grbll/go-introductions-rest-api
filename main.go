@@ -14,7 +14,7 @@ import (
 	"github.com/grbll/go-introductions-rest-api/repository/user/mysql"
 )
 
-var version string = "0.0.623"
+var version string = "0.0.64"
 
 func main() {
 	var dsn string = "goapp:goapp@tcp(mysql:3306)/timestampdb"
